@@ -146,7 +146,7 @@ void math_temperature(struct bmp180_t *bmp180)
 	x1 = (bmp180->UT - bmp180->AC6) * bmp180->AC5 >> 15;
 	x2 = ((int32_t)bmp180->MC << 11) / (x1 + bmp180->MD);
 	bmp180->B5 = x1 + x2;
-	bmp180->T = (bmp180->B5 + 8L) >> 4;
+	bmp180->T = (bmp180->B5 + 8) >> 4;
 }
 
 void math_pressure(struct bmp180_t *bmp180)
@@ -155,13 +155,13 @@ void math_pressure(struct bmp180_t *bmp180)
 	int32_t x1, x2, x3, b3, b6;
 
 	b6 = bmp180->B5 - 4000;
-	x1 = (bmp180->B2 * ((b6 * b6) >> 12)) >> 11;
-	x2 = (bmp180->AC2 * b6) >> 11;
+	x1 = (bmp180->B2 * (b6 * b6 >> 12)) >> 11;
+	x2 = bmp180->AC2 * b6 >> 11;
 	x3 = x1 + x2;
 
 	b3 = ((((int32_t)bmp180->AC1 * 4 + x3) << bmp180->oss) + 2) >> 2;
-	x1 = (bmp180->AC3 * b6) >> 13;
-	x2 = (bmp180->B1 * ((b6 * b6) >> 12)) >> 16;
+	x1 = bmp180->AC3 * b6 >> 13;
+	x2 = (bmp180->B1 * (b6 * b6 >> 12)) >> 16;
 	x3 = (x1 + x2 + 2) >> 2;
 	b4 = (bmp180->AC4 * (uint32_t)(x3 + 32768)) >> 15;
 	b7 = (uint32_t)(bmp180->UP - b3) * (50000 >> bmp180->oss);
@@ -217,18 +217,29 @@ uint8_t bmp180_read_temperature(struct bmp180_t *bmp180)
 
 uint8_t bmp180_read_pressure(struct bmp180_t *bmp180)
 {
-	uint8_t err, delay, byte;
+	uint8_t err, byte;
 	uint16_t word;
 
 	/* Read UP */
 	err = register_wb(BMP180_REG_CTRL, (0x34 + (bmp180->oss << 6)));
 
 	if (!err) {
-		for (delay=0; delay <= bmp180->oss+1; delay++)
-			_delay_ms(5);
+		switch (bmp180->oss) {
+			case BMP180_RES_LOW:
+				_delay_ms(5);
+				break;
+			case BMP180_RES_STD:
+				_delay_ms(8);
+				break;
+			case BMP180_RES_HIGH:
+				_delay_ms(14);
+				break;
+			default:
+				_delay_ms(26);
+		}
 
 		err = register_rw(BMP180_REG_ADC, &word);
-		bmp180->UP = (long) (word<<8);
+		bmp180->UP = (int32_t)word << 8;
 
 		if (!err) {
 			err = register_rb(BMP180_REG_ADCXLSB, &byte);

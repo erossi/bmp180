@@ -126,7 +126,7 @@ int main(void)
 	struct bmp180_t *bmp180;
 	char *string;
 	uint8_t err;
-	int i;
+	uint32_t pold, pmed;
 
 	string = malloc(80);
 	bmp180 = malloc(sizeof(struct bmp180_t));
@@ -142,19 +142,30 @@ int main(void)
 		print_error(err, string);
 
 	print_struct(bmp180, string);
-	i = 0;
-	/* set resolution to max */
-	bmp180->oss = 0;
+	bmp180->oss = BMP180_RES_ULTRAHIGH;
+	err = bmp180_read_all(bmp180);
+	pmed = bmp180->p;
+	pold = pmed;
 
+	if (!err)
+		print_results(bmp180, string);
+
+	/* try media for 32 readings,
+	 * p = ((p*31) + new)/2^6)
+	 */
 	while(1) {
-		err = bmp180_read_all(bmp180);
+		err = bmp180_read_pressure(bmp180);
+		/*
+		 * pmed = ((pmed * 7) + bmp180->p) >> 3;
+		 */
+		pmed = bmp180->p;
 
-		if (!err) {
-			print_results(bmp180, string);
+		if (abs(pold - pmed) > 10) {
+			pold = pmed;
+			string = ultoa(pmed, string, 10);
+			uart_printstr(0, string);
+			uart_printstr(0, "\n");
 		}
-
-		_delay_ms(5000);
-		uart_printstr(0, "\n");
 	}
 
 	return(0);
