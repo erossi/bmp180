@@ -51,6 +51,8 @@
 #define BMP180_RES_HIGH 2
 #define BMP180_RES_ULTRAHIGH 3
 
+#define BMP180_SEALEVEL 101325L
+
 struct bmp180_t {
 	uint8_t id;
 
@@ -72,15 +74,18 @@ struct bmp180_t {
 	int32_t UP;
 	int32_t T;
 	int32_t p;
+	int32_t p0;
 
 	int32_t B5;
 
 	uint8_t flags;
+	float altitude;
 };
 
 uint8_t bmp180_init(struct bmp180_t *bmp180);
 uint8_t bmp180_read_temperature(struct bmp180_t *bmp180);
 uint8_t bmp180_read_pressure(struct bmp180_t *bmp180);
 uint8_t bmp180_read_all(struct bmp180_t *bmp180);
+void bmp180_altitude(struct bmp180_t *bmp180);
 
 #endif

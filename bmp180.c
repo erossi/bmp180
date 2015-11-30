@@ -177,6 +177,11 @@ void math_pressure(struct bmp180_t *bmp180)
 	bmp180->p += ((x1 + x2 + 3791) >> 4);
 }
 
+void bmp180_altitude(struct bmp180_t *bmp180)
+{
+	bmp180->altitude = 44330.0F * (1.0F - ((float)pow(((float)bmp180->p/(float)bmp180->p0), 0.190223F)));
+}
+
 uint8_t bmp180_resolution(const uint8_t mode)
 {
 	uint8_t err, byte;
@@ -261,6 +266,7 @@ uint8_t bmp180_init(struct bmp180_t *bmp180)
 	uint8_t err;
 
 	bmp180->flags = 0;
+	bmp180->p0 = BMP180_SEALEVEL;
 	i2c_init();
 	err = register_rb(BMP180_REG_ID, &bmp180->id);
 
