@@ -21,13 +21,17 @@
 #include <util/delay.h>
 #include "bmp180.h"
 
+/** Swap MSB<->LSB of an uint16.
+ *
+ * @param swapme ptr to the uint16.
+ */
 void swapit(uint16_t *swapme)
 {
-	uint8_t L;
+	uint8_t lsb;
 
-	L = (*swapme) & 0xff;
+	lsb = (*swapme) & 0xff;
 	(*swapme) = (*swapme) >> 8;
-	(*swapme) |= (uint16_t)L << 8;
+	(*swapme) |= (uint16_t)lsb << 8;
 }
 
 /** Register Read (Byte).
