@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 Enrico Rossi
+/* Copyright (C) 2011-2016 Enrico Rossi
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -20,6 +20,8 @@
 #ifndef I2C_DEF
 #define I2C_DEF
 
+#include <stdint.h>
+
 #define START 1
 #define STOP 2
 #define SLA 3
@@ -27,18 +29,34 @@
 #define ACK 5
 #define NACK 6
 
+#define I2C_GC_RESET 0
+#define I2C_TIMEOUT 0xff
+
 #define READ 1
 #define WRITE 0
+
+#ifndef TRUE
 #define TRUE 1
 #define FALSE 0
+#endif
 
 uint8_t i2c_send(const uint8_t code, const uint8_t data);
 void i2c_init(void);
+void i2c_shut(void);
+uint8_t i2c_mtm(const uint8_t addr, const uint16_t lenght,
+		uint8_t *data, const uint8_t stop);
+uint8_t i2c_mrm(const uint8_t addr, const uint16_t lenght,
+		uint8_t *data, const uint8_t stop);
+uint8_t i2c_gc(const uint8_t call);
+
+#ifdef I2C_LEGACY_MODE
 uint8_t i2c_master_send_b(const uint8_t addr, const uint8_t data,
 		const uint8_t stop);
-uint8_t i2c_master_send_w(const uint8_t addr, const uint8_t msb, const uint8_t lsb);
+uint8_t i2c_master_send_w(const uint8_t addr, const uint8_t msb,
+		const uint8_t lsb);
 uint8_t i2c_master_read_b(const uint8_t addr, uint8_t *byte,
 		const uint8_t stop);
-uint8_t i2c_master_read_w(const uint8_t addr, uint16_t *code);
+uint8_t i2c_master_read_w(const uint8_t addr, uint16_t *data);
+#endif
 
 #endif

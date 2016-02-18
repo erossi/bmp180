@@ -54,6 +54,7 @@ SIZE = avr-size --format=avr --mcu=$(MCU) $(PRGNAME).elf
 
 REMOVE = rm -f
 
+CFLAGS += -D I2C_LEGACY_MODE
 objects = uart.o i2c.o bmp180.o
 
 .PHONY: clean indent
