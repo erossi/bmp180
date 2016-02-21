@@ -60,17 +60,32 @@ uint8_t i2c_send(const uint8_t code, const uint8_t data)
 /*! Initialize the i2c bus.
  *
  * See the datasheet for SCL speed.
+ * Prescaler value (1, 4, 16, 64)
+ *
  * SCL freq = CPU FREQ / (16 + 2 * TWBR * Prescaler)
+ * (16 + 2 * TWBR * Prescaler) = CPU FREQ / SCL freq
+ * 2 * TWBR * Prescaler = (CPU FREQ / SCL freq) - 16
+ * TWBR * Prescaler = ((CPU FREQ / SCL freq) - 16)/2
+ *
  * SCLf(max) = CPUf/16
  *
  * 16Mhz CLK, 100Khz I2C bus, Prescaler = 4, TWBR = 18
+ * 16Mhz CLK, 10Khz I2C bus, Prescaler = 4, TWBR = 198
  * 1Mhz CLK, 10Khz I2C bus, Prescaler = 1, TWBR = 42
  */
 void i2c_init(void)
 {
+#if (F_CPU == 1000000UL)
 	/* Prescaler 1 */
 	TWSR = 0;
 	TWBR = 42;
+#elif (F_CPU == 16000000UL)
+	/* Prescaler 8 */
+	TWSR |= _BV(TWPS0);
+	TWBR = 99;
+#else
+#error I2C clock rate unsupported
+#endif
 }
 
 /*! Shutdown the i2c bus.
