@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2016 Enrico Rossi
+/* Copyright (C) 2011-2017 Enrico Rossi
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -22,18 +22,34 @@
 
 #include <stdint.h>
 
-#define START 1
-#define STOP 2
-#define SLA 3
-#define DATA 4
-#define ACK 5
-#define NACK 6
-
+/* common defs */
 #define I2C_GC_RESET 0
 #define I2C_TIMEOUT 0xff
 
 #define READ 1
 #define WRITE 0
+
+// C++ compiler
+#ifdef __cplusplus
+
+class I2C {
+	private:
+		// I2C bus should be initialized only once
+		static bool initialized; // class attribute
+		static uint8_t bus_status;
+		uint8_t error;
+		const uint8_t address; // device's address
+		void send(const uint8_t, const uint8_t);
+	public:
+		I2C(uint8_t); // set the device address
+		static void Init(); // Initialize bus
+		static void Shut(); // De-initialize bus
+		uint8_t tx(bool, const uint16_t, uint8_t*, bool = true);
+		uint8_t gc(const uint8_t);
+};
+
+#else /* __cplusplus */
+#include <stdint.h>
 
 #ifndef TRUE
 #define TRUE 1
@@ -57,6 +73,6 @@ uint8_t i2c_master_send_w(const uint8_t addr, const uint8_t msb,
 uint8_t i2c_master_read_b(const uint8_t addr, uint8_t *byte,
 		const uint8_t stop);
 uint8_t i2c_master_read_w(const uint8_t addr, uint16_t *data);
-#endif
-
+#endif /* I2C_LEGACY_MODE */
+#endif /* CPP */
 #endif
