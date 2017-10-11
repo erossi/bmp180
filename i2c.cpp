@@ -124,7 +124,8 @@ void I2C::send(const uint8_t code, const uint8_t data)
  * the max lenght the number of byte to receive.
  *
  * \param *data the pointer to the block of byte.
- * \param stop the stop at the end of the communication.
+ * \param stop the stop at the end of the communication
+ * default to TRUE.
  *
  */
 uint8_t I2C::tx(const bool rw, const uint16_t lenght,
@@ -204,16 +205,15 @@ uint8_t I2C::tx(const bool rw, const uint16_t lenght,
  */
 uint8_t I2C::gc(const uint8_t call)
 {
-	uint8_t i, err;
-	err = 0;
+	uint8_t i;
 
 	switch(call) {
 		case I2C_GC_RESET:
 		default:
 			/* Send the General Call reset */
 			i = 0x06;
-			err = tx(WRITE, 1, &i);
+			tx(WRITE, 1, &i);
 	}
 
-	return(err);
+	return(bus_status);
 }
