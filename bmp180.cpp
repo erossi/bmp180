@@ -136,6 +136,7 @@ BMP180::BMP180(uint8_t addr) : address{addr}
 {
 	uint8_t err;
 
+	// Read the device's id
 	err = register_rb(BMP180_REG_ID, &id);
 
 	if (!err && (id == 0x55)) {

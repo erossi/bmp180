@@ -54,7 +54,6 @@
 
 class BMP180 {
 	private:
-		const uint8_t address;
 		int16_t AC1;
 		int16_t AC2;
 		int16_t AC3;
@@ -71,11 +70,10 @@ class BMP180 {
 
 		int32_t UT;
 		int32_t UP;
-		int32_t T;
-		int32_t p;
 		// int32_t p0; // BMP180_SEALEVEL
 
 		int32_t B5;
+
 		I2C i2c {address}; // Contructor
 		uint8_t register_rb(uint8_t, uint8_t*);
 		uint8_t register_rw(uint8_t, uint16_t*);
@@ -83,11 +81,14 @@ class BMP180 {
 		void math_temperature();
 		void math_pressure();
 		void math_altitude();
-		uint8_t resolution(const uint8_t);
+		uint8_t resolution(const uint8_t); // WTF?
 	public:
-		BMP180(uint8_t);
+		BMP180(uint8_t); // constructor
+		const uint8_t address;
 		uint8_t id;
 		float altitude;
+		int32_t T; // Temperature
+		int32_t p; // Pressure
 		uint8_t read_temperature();
 		uint8_t read_pressure();
 		uint8_t read_all();
