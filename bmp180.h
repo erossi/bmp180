@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 Enrico Rossi
+/* Copyright (C) 2013, 2017 Enrico Rossi
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -17,15 +17,11 @@
 
 /*! \file bmp180.h */
 
-#ifndef BMP180
-#define BMP180
+#ifndef _BMP180
+#define _BMP180
 
+#include <stdint.h>
 #include "i2c.h"
-
-/** The address of the device.
- * Typical it is 0x55
- */
-#define BMP180_ADDR 0xee
 
 #define BMP180_REG_AC1 0xaa
 #define BMP180_REG_AC2 0xac
@@ -51,6 +47,58 @@
 #define BMP180_RES_HIGH 2
 #define BMP180_RES_ULTRAHIGH 3
 
+// C++ compiler
+#ifdef __cplusplus
+
+#define BMP180_SEALEVEL 101325.0F // Pressure at sealevel
+
+class BMP180 {
+	private:
+		const uint8_t address;
+		int16_t AC1;
+		int16_t AC2;
+		int16_t AC3;
+		uint16_t AC4;
+		uint16_t AC5;
+		uint16_t AC6;
+		int16_t B1;
+		int16_t B2;
+		int16_t MB;
+		int16_t MC;
+		int16_t MD;
+
+		uint8_t oss;
+
+		int32_t UT;
+		int32_t UP;
+		int32_t T;
+		int32_t p;
+		// int32_t p0; // BMP180_SEALEVEL
+
+		int32_t B5;
+		I2C i2c {address}; // Contructor
+		uint8_t register_rb(uint8_t, uint8_t*);
+		uint8_t register_rw(uint8_t, uint16_t*);
+		uint8_t dump_calibration_data(void);
+		void math_temperature();
+		void math_pressure();
+		void math_altitude();
+		uint8_t resolution(const uint8_t);
+	public:
+		BMP180(uint8_t);
+		uint8_t id;
+		float altitude;
+		uint8_t read_temperature();
+		uint8_t read_pressure();
+		uint8_t read_all();
+};
+
+#else // __cplusplus
+
+/** The address of the device.
+ * Typical it is 0x55
+ */
+#define BMP180_ADDR 0xee
 #define BMP180_SEALEVEL 101325L
 
 struct bmp180_t {
@@ -88,4 +136,5 @@ uint8_t bmp180_read_pressure(struct bmp180_t *bmp180);
 uint8_t bmp180_read_all(struct bmp180_t *bmp180);
 void bmp180_altitude(struct bmp180_t *bmp180);
 
+#endif // __cplusplus
 #endif
